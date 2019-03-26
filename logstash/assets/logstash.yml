@@ -1,0 +1,3 @@
+http.host: "0.0.0.0"
+xpack.monitoring.enabled: true
+xpack.monitoring.elasticsearch.url: http://172.72.73.2:9200

@@ -1,0 +1,79 @@
+version: '3.7'
+services:
+  dev_elasticsearch:
+    image: elasticsearch:6.6.2
+    container_name: "dev_elk_elasticsearch"
+    restart: on-failure
+    # environment:
+      # - http.host=0.0.0.0
+      # - transport.host=127.0.0.1
+      # - cluster.name=docker-cluster
+      # - bootstrap.memory_lock=true
+      # - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    networks:
+      - elk
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - "./elk_elasticsearch_data_volume:/opt/elasticsearch/data"
+  
+
+  dev_logstash:
+    image: logstash:6.6.2
+    container_name: "dev_elk_logstash"
+    restart: on-failure
+    ports:
+      - "24642:24642"
+      - "35753:35753"
+      - "5044:5044"
+    #command: -f /usr/share/logstash/config/conf.d/logstash.conf --log.level debug
+    command: -f /usr/share/logstash/config/conf.d/logstash.conf
+    tty: true
+    privileged: true
+    volumes:
+      - ./logstash/assets/logstash.conf:/usr/share/logstash/config/conf.d/logstash.conf
+      - ./logstash/assets/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - "./elk_logstash_data_volume:/home/logstash"
+    links:
+      - dev_elasticsearch
+    networks:
+      - elk
+      
+  dev_kibana:
+    # build:
+    #   context: ./kibana
+    image: kibana:6.6.2
+    container_name: "dev_elk_kibana"
+    restart: on-failure
+    ports: 
+       - "5601:5601"
+    links:
+      - dev_elasticsearch
+    networks:
+      - elk
+    volumes:
+      - ./kibana/assets/kibana.yml:/usr/share/kibana/config/kibana.yml 
+  dev_nginx:
+    image: nginx:stable-alpine
+    container_name: "dev_elk_nginx"
+    links:
+      - dev_kibana
+    ports: 
+      - "80:80"
+      - "443:443"
+    networks:
+      - elk
+    # volumes:
+    #   - /nginx/assets/certs:/etc/nginx/certs
+    #   - /nginx/assets/nginx.conf:/etc/nginx/nginx.conf
+
+networks:
+  elk:
+    ipam:
+      config:
+      - subnet: 172.72.73.0/24
+
+volumes:
+  elk_elasticsearch_data_volume:
+  elk_logstash_data_volume:
