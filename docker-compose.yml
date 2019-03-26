@@ -4,12 +4,6 @@ services:
     image: elasticsearch:6.6.2
     container_name: "dev_elk_elasticsearch"
     restart: on-failure
-    # environment:
-      # - http.host=0.0.0.0
-      # - transport.host=127.0.0.1
-      # - cluster.name=docker-cluster
-      # - bootstrap.memory_lock=true
-      # - ES_JAVA_OPTS=-Xms512m -Xmx512m
     networks:
       - elk
     ports:
@@ -27,7 +21,6 @@ services:
       - "24642:24642"
       - "35753:35753"
       - "5044:5044"
-    #command: -f /usr/share/logstash/config/conf.d/logstash.conf --log.level debug
     command: -f /usr/share/logstash/config/conf.d/logstash.conf
     tty: true
     privileged: true
@@ -41,8 +34,6 @@ services:
       - elk
       
   dev_kibana:
-    # build:
-    #   context: ./kibana
     image: kibana:6.6.2
     container_name: "dev_elk_kibana"
     restart: on-failure
@@ -64,9 +55,9 @@ services:
       - "443:443"
     networks:
       - elk
-    # volumes:
-    #   - /nginx/assets/certs:/etc/nginx/certs
-    #   - /nginx/assets/nginx.conf:/etc/nginx/nginx.conf
+    volumes:
+      - ./nginx/assets/certs:/etc/nginx/certs
+      - ./nginx/assets/nginx.conf:/etc/nginx/nginx.conf
 
 networks:
   elk:
