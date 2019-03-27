@@ -1,8 +1,9 @@
+
 version: '3.7'
 services:
   dev_elasticsearch:
     image: elasticsearch:6.6.2
-    container_name: "dev_elk_elasticsearch"
+    container_name: "elk_elasticsearch"
     restart: on-failure
     networks:
       - elk
@@ -10,12 +11,12 @@ services:
       - "9200:9200"
       - "9300:9300"
     volumes:
-      - "./elk_elasticsearch_data_volume:/opt/elasticsearch/data"
+      - elasticsearch_data_volume:/opt/elasticsearch/data
   
 
   dev_logstash:
     image: logstash:6.6.2
-    container_name: "dev_elk_logstash"
+    container_name: "elk_logstash"
     restart: on-failure
     ports:
       - "24642:24642"
@@ -27,7 +28,7 @@ services:
     volumes:
       - ./logstash/assets/logstash.conf:/usr/share/logstash/config/conf.d/logstash.conf
       - ./logstash/assets/logstash.yml:/usr/share/logstash/config/logstash.yml
-      - "./elk_logstash_data_volume:/home/logstash"
+      -  logstash_data_volume:/home/logstash
     links:
       - dev_elasticsearch
     networks:
@@ -35,7 +36,7 @@ services:
       
   dev_kibana:
     image: kibana:6.6.2
-    container_name: "dev_elk_kibana"
+    container_name: "elk_kibana"
     restart: on-failure
     ports: 
        - "5601:5601"
@@ -47,7 +48,8 @@ services:
       - ./kibana/assets/kibana.yml:/usr/share/kibana/config/kibana.yml 
   dev_nginx:
     image: nginx:stable-alpine
-    container_name: "dev_elk_nginx"
+    container_name: "elk_nginx"
+    restart: on-failure
     links:
       - dev_kibana
     ports: 
@@ -66,5 +68,5 @@ networks:
       - subnet: 172.72.73.0/24
 
 volumes:
-  elk_elasticsearch_data_volume:
-  elk_logstash_data_volume:
+  elasticsearch_data_volume:
+  logstash_data_volume:
